@@ -26,12 +26,13 @@ dependencies:
 - text
 - containers
 - ghc
+- Cabal
 
 library:
   source-dirs: src
 
 executables:
-  ckii2eu4-exe:
+  ckii2eu4:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
