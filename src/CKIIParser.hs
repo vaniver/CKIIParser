@@ -4,7 +4,9 @@ module CKIIParser where
 import           Data.Char                      ( isSpace )
 import           Data.Map                       ( Map(..)
                                                 , fromList
+                                                , size
                                                 )
+import           Data.Scientific                ( Scientific(..) )
 import           Data.Text                      ( Text(..)
                                                 , pack
                                                 , unpack
@@ -22,17 +24,23 @@ type Parser = Parsec Void Text
 
 newtype Key = Key Text deriving (Show, Eq, Ord)
 type SaveFileMap = Map Key SaveFileValue
-data SaveFileValue = TextValue Text | ListValue [Integer] | MapValue SaveFileMap deriving Show
+data SaveFileList = IntListValue [Integer] | SciListValue [Scientific] | SaveFileMapList [SaveFileValue] deriving Show
+data SaveFileValue = TextValue Text | MapValue SaveFileMap | SaveFileValueList SaveFileList deriving Show
 
 
 -- Save file parser
 -- -------------------------------------------------------------------------------------------------
 
 parseSaveFile :: Text -> IO ()
-parseSaveFile = parseTest pSaveFileMap
+parseSaveFile input = case (parse pSaveFileMap "whatever" input) of
+  Left x -> putStrLn (show x)
+  Right y ->  putStrLn (show (size y))
+
+parseTestSaveFile :: Text -> IO ()
+parseTestSaveFile = parseTest pSaveFileMap
 
 pSaveFileMap :: Parser SaveFileMap
-pSaveFileMap = fromList <$> between (symbol "CK2txt") eof (many pKeyValue)
+pSaveFileMap = fromList <$> (symbol "CK2txt" *> manyTill pKeyValue (symbol "}")) <* eof
 
 
 -- Key value pair parser
@@ -45,21 +53,27 @@ pKey :: Parser Text
 pKey = pack <$> manyTill L.charLiteral (symbol "=")
 
 pValue :: Parser SaveFileValue
-pValue = choice [try pListValue, pMapValue, pStringValue] <* sc
+pValue = choice [try pIntListValue, try pSciListValue, try pSaveFileMapList, pMapValue, pStringValue] <* sc
 
 
 -- SaveFileValue parsers
 -- -------------------------------------------------------------------------------------------------
 
-pListValue :: Parser SaveFileValue
-pListValue = betweenBraces $ ListValue <$> many listInteger
+pIntListValue :: Parser SaveFileValue
+pIntListValue = betweenBraces $ SaveFileValueList . IntListValue <$> many listInteger
   where integer     = lexeme L.decimal
         listInteger = L.signed sc integer
 
+pSciListValue :: Parser SaveFileValue
+pSciListValue = betweenBraces $ SaveFileValueList . SciListValue <$> many listScientific
+  where scientific     = lexeme L.scientific
+        listScientific = L.signed sc scientific
+
+pSaveFileMapList :: Parser SaveFileValue
+pSaveFileMapList = betweenBraces $ SaveFileValueList . SaveFileMapList <$> many pMapValue
+
 pMapValue :: Parser SaveFileValue
 pMapValue = MapValue . fromList <$> (symbol "{" *> manyTill pKeyValue (symbol "}"))
--- TODO: Figure out why the below doesn't work
--- pSaveMap = MapValue . fromList <$> betweenBraces (many pKeyValue)
 
 pStringValue :: Parser SaveFileValue
 pStringValue = choice

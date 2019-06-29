@@ -27,6 +27,7 @@ dependencies:
 - containers
 - ghc
 - Cabal
+- scientific
 
 library:
   source-dirs: src

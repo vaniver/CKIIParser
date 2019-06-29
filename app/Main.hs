@@ -8,5 +8,6 @@ main :: IO ()
 main = do
   args      <- getArgs
   inputFile <- T.readFile $ head args
-  print inputFile
-  parseSaveFile inputFile
+  --print inputFile
+  parseTestSaveFile inputFile
+  --parseSaveFile inputFile

@@ -13,5 +13,39 @@ CK2txt
 				data={ 1 1 0 -21 14 - 5 5 1 0 21 14 5 5 }
 				religion="catholic"
 			}
+			history=
+			{
+			}
+			losses=
+			{
+				light_infantry_f={0.000 1093.331}
+				heavy_infantry_f={0.000 1070.974}
+				pikemen_f={0.000 255.858}
+				light_cavalry_f={0.000 130.399}
+				knights_f={0.000 11.872}
+				archers_f={0.000 550.874}
+			}
 		}
 	}
+	417.3.12=
+	{
+		holder=7776
+	}
+	character=
+	{
+		696082=
+		{
+			bn="Bälgiçi"
+			b_d="1021.6.9"
+			d_d="1054.1.3"
+			c_d=death_poor_health
+			lge=662887
+			att={0 8 7 9 8}
+			traits={14 134 96 77 94 85 73 }
+			rel="norse_pagan_reformed"
+			cul="khazar"
+			dna="uiakcssxylk"
+			prp="cc0fhk00000000"
+		}
+	}
+}
