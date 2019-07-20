@@ -24,7 +24,7 @@ type Parser = Parsec Void Text
 
 newtype Key = Key Text deriving (Show, Eq, Ord)
 type SaveFileMap = Map Key SaveFileValue
-data SaveFileList = IntListValue [Integer] | SciListValue [Scientific] | SaveFileMapList [SaveFileValue] deriving Show
+data SaveFileList = IntListValue [Integer] | SciListValue [Scientific] | LawListValue [Text] | SaveFileMapList [SaveFileValue] deriving Show
 data SaveFileValue = TextValue Text | MapValue SaveFileMap | SaveFileValueList SaveFileList deriving Show
 
 
@@ -53,7 +53,12 @@ pKey :: Parser Text
 pKey = pack <$> manyTill L.charLiteral (symbol "=")
 
 pValue :: Parser SaveFileValue
-pValue = choice [try pIntListValue, try pSciListValue, try pSaveFileMapList, pMapValue, pStringValue] <* sc
+pValue = choice [try pIntListValue <?> "IntList", 
+                 try pSciListValue <?> "SciList", 
+                 try pLawListValue <?> "LawList",
+                 try pSaveFileMapList <?> "MapList", 
+                 pMapValue, 
+                 pStringValue] <* sc
 
 
 -- SaveFileValue parsers
@@ -68,6 +73,18 @@ pSciListValue :: Parser SaveFileValue
 pSciListValue = betweenBraces $ SaveFileValueList . SciListValue <$> many listScientific
   where scientific     = lexeme L.scientific
         listScientific = L.signed sc scientific
+
+pLawListValue :: Parser SaveFileValue
+pLawListValue = betweenBraces $ SaveFileValueList . LawListValue <$> many listLaw
+  where listLaw = choice [try (symbol "laws"),
+                          try (symbol "enforce_peace"),
+                          try (symbol "declare_war_interaction"),
+                          try (symbol "revoke_title_interaction"),
+                          try (symbol "imprison_character_interaction"),
+                          try (symbol "grant_landed_title_interaction"),
+                          try (symbol "exile_imprisoned_interaction"),
+                          try (symbol "execute_imprisoned_interaction")]
+
 
 pSaveFileMapList :: Parser SaveFileValue
 pSaveFileMapList = betweenBraces $ SaveFileValueList . SaveFileMapList <$> many pMapValue

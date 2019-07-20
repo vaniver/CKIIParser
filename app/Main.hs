@@ -9,5 +9,5 @@ main = do
   args      <- getArgs
   inputFile <- T.readFile $ head args
   --print inputFile
-  parseTestSaveFile inputFile
-  --parseSaveFile inputFile
+  --parseTestSaveFile inputFile
+  parseSaveFile inputFile
